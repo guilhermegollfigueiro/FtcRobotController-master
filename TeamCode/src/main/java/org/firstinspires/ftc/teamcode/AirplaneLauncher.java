@@ -28,7 +28,10 @@ public class AirplaneLauncher extends OpMode {
             servo.setPosition(MIN_POS);
 
         }
+        if (gamepad1.b) {  // se alguem apertar o botao a o servo gira ate 0
+            servo.setPosition(MID_POS);
 
+        }
         telemetry.update();
     }
 }
