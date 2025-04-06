@@ -4,10 +4,19 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name="MecanumTeleOp", group="Launcher & Drive")
+@TeleOp(name="Robosao", group="Launcher & Drive")
 
 public class MecanumTeleOp extends LinearOpMode {
+
+    private Servo servo;
+
+    private static final double SERVO_PRONTO = 0.5; //o servo está na posicao correta para lancao o aviao
+    private static final double SERVO_LANCOU = 0.0; //o servo lancou o aviao
+
+    boolean acionarServo = false;
+    ElapsedTime servoTimer = new ElapsedTime();
 
     // nao esquecer de colocar os mesmos nomes no driver hub
     private final ElapsedTime runtime = new ElapsedTime();
@@ -15,10 +24,15 @@ public class MecanumTeleOp extends LinearOpMode {
     @Override
     public void runOpMode() {
 
+        servo = hardwareMap.get(Servo.class, "servo");
+
+        servo.setPosition(SERVO_PRONTO);
+
         DcMotor leftFrontDrive = hardwareMap.get(DcMotor.class, "leftFrontDrive");
         DcMotor leftBackDrive = hardwareMap.get(DcMotor.class, "leftBackDrive");
         DcMotor rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFrontDrive");
         DcMotor rightBackDrive = hardwareMap.get(DcMotor.class, "rightBackDrive");
+
 
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -55,6 +69,17 @@ public class MecanumTeleOp extends LinearOpMode {
                 rightFrontPower /= max;
                 leftBackPower   /= max;
                 rightBackPower  /= max;
+            }
+
+            if (gamepad1.a && !acionarServo) {
+                servo.setPosition(SERVO_LANCOU);
+                servoTimer.reset();
+                acionarServo = true;
+            }
+
+            if (acionarServo && servoTimer.milliseconds() > 500) { // 500ms depois
+                servo.setPosition(SERVO_PRONTO);
+                acionarServo = false;
             }
 
             // define a potencia dos motores com o que ja foi calculado
